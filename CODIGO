@@ -17,15 +17,15 @@ class Libro(Material):
         self.genero = genero
         self.nota = nota
 
-    def obtener_detalle(self):  # Polimorfismo
+    def obtener_detalle(self):
         return f"[{self.genero.upper()}] {self.titulo} | Autor: {self.autor} | Nota: {self.nota}"
 
-    def __str__(self):  # Permite que el 'print(r)' del menú funcione correctamente
+    def __str__(self): 
         return self.obtener_detalle()
 
 
 
-# GESTOR DE ARCHIVOS
+# MANEJADOR DE LIBROS
 class GestorArchivo:
     RUTA_ARCHIVO = "libros.txt"
 
@@ -71,7 +71,7 @@ def mostrar_menu():
             gen = input("Género a buscar: ")
             resultados = GestorArchivo.consultar(gen)
             for r in resultados: 
-                print(r)  # Imprime usando el método __str__ (Polimorfismo)
+                print(r)
             if not resultados: 
                 print("No hay libros en esa categoría.")
 
