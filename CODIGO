@@ -1,0 +1,98 @@
+import os
+import unittest
+
+# CATEGORIAS
+
+class Material:
+    def __init__(self, titulo, autor):
+        self.titulo = titulo
+        self.autor = autor
+
+    def obtener_detalle(self):
+        return f"{self.titulo} - {self.autor}"
+
+class Libro(Material):
+    def __init__(self, titulo, autor, genero, nota):
+        super().__init__(titulo, autor)
+        self.genero = genero
+        self.nota = nota
+
+    def obtener_detalle(self):  # Polimorfismo
+        return f"[{self.genero.upper()}] {self.titulo} | Autor: {self.autor} | Nota: {self.nota}"
+
+    def __str__(self):  # Permite que el 'print(r)' del menú funcione correctamente
+        return self.obtener_detalle()
+
+
+
+# GESTOR DE ARCHIVOS
+class GestorArchivo:
+    RUTA_ARCHIVO = "libros.txt"
+
+    @classmethod
+    def guardar(cls, libro):
+        linea = f"{libro.titulo},{libro.autor},{libro.genero},{libro.nota}\n"
+        with open(cls.RUTA_ARCHIVO, "a", encoding="utf-8") as f:
+            f.write(linea)
+
+    @classmethod
+    def consultar(cls, genero_buscar):
+        if not os.path.exists(cls.RUTA_ARCHIVO):
+            return []
+
+        resultados = []
+        with open(cls.RUTA_ARCHIVO, "r", encoding="utf-8") as f:
+            for linea in f:
+                partes = linea.strip().split(",")
+                if len(partes) == 4:
+                    t, a, g, n = partes
+                    if g.lower() == genero_buscar.lower():
+                        resultados.append(Libro(t, a, g, n))
+        return resultados
+
+
+# MENÚ PRINCIPAL
+def mostrar_menu():
+    while True:
+        print("\n=== SISTEMA BIBLIOTECA (TODO EN UNO) ===")
+        print("1. Registrar Libro\n2. Consultar por Género\n3. Correr Pruebas\n4. Salir")
+        op = input("Seleccione: ")
+
+        if op == "1":
+            t = input("Título: "); a = input("Autor: "); n = input("Nota: ")
+            print("Géneros: Romance, Terror, Historia")
+            g = input("Género: ")
+            
+            nuevo = Libro(t, a, g, n)
+            GestorArchivo.guardar(nuevo)
+            print("¡Libro guardado!")
+
+        elif op == "2":
+            gen = input("Género a buscar: ")
+            resultados = GestorArchivo.consultar(gen)
+            for r in resultados: 
+                print(r)  # Imprime usando el método __str__ (Polimorfismo)
+            if not resultados: 
+                print("No hay libros en esa categoría.")
+
+        elif op == "3":
+            print("\n--- Ejecutando Pruebas Unitarias ---")
+            unittest.main(argv=[''], exit=False)
+
+        elif op == "4": 
+            break
+
+
+# PRUEBAS UNITARIAS
+class TestBiblio(unittest.TestCase):
+    def test_creacion(self):
+        l = Libro("Test", "Yo", "Terror", "Ok")
+        self.assertEqual(l.genero, "Terror")
+        
+    def test_polimorfismo(self):
+        l = Libro("Drácula", "Stoker", "Terror", "Bueno")
+        self.assertIn("[TERROR]", l.obtener_detalle())
+
+
+if __name__ == "__main__":
+    mostrar_menu()
